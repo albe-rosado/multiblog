@@ -1,0 +1,29 @@
+body {
+    font-family: 'Source Code Pro', monospace;
+}
+
+nav {
+    margin-top: 1em;
+}
+
+
+input {
+    margin: 6px;
+}
+
+.btn {
+    margin: 4px;
+}
+
+
+.navbar-brand {
+    color: #1a237e !important;
+}
+
+.wel-msg {
+    padding-top: 0.5em;
+}
+
+.comp-text {
+    margin-top: 1.5em;
+}
