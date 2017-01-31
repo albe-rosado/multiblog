@@ -29,6 +29,7 @@ def post_key(name = 'default'):
 class Post(db.Model):
     title = db.StringProperty(required = True)
     content = db.TextProperty(required = True)
+    author = db.StringProperty(required=True)
     created = db.DateTimeProperty(auto_now_add = True)
 
 

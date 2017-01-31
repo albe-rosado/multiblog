@@ -142,63 +142,80 @@ class BlogFront(Register):
     def get(self):
         posts = Post.all().order('-created')
         params = dict(username = self.user.name, posts = posts)
-        self.render('blog.html', username = self.user.name)
+        self.render('blogPage.html', **params)
 
 
 
-
+# New Post Creation
 class NewPost(BlogHandler):
     def get(self):
         if self.user:
-            self.render("newPostPage.html")
+            self.render("newPostPage.html", username = self.user.name)
         else:
             self.redirect("/")
-
 
     def post(self):
         if not self.user:
             self.redirect('/blog')
 
-        subject = self.request.get('subject')
+        title = self.request.get('title')
         content = self.request.get('content')
 
-        if subject and content:
-            p = Post(parent = blog_key(), subject = subject, content = content)
+        if title and content:
+            p = Post(parent = post_key(), title = title, content = content, author = self.user.name)
             p.put()
-            self.redirect('/blog/%s' % str(p.key().id()))
+            self.redirect('/blog')
+            # self.redirect('/blog/%s' % str(p.key().id()))
         else:
-            error = "subject and content, please!"
-            self.render("newpost.html", subject=subject, content=content, error=error)
-
-
-
+            error = "Both subject and content are required!"
+            self.render("newPostPage.html", title = title, content = content, error = error)
 
 
 
 class PostPage(BlogHandler):
     def get(self, post_id):
-        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
+        key = db.Key.from_path('Post', int(post_id), parent=post_key())
         post = db.get(key)
 
         if not post:
             self.error(404)
             return
 
-        self.render("permalink.html", post = post)
+        if post.author != self.user.name:
+            self.redirect('/')
+
+        params = dict(title = post.title, content = post.content, username = self.user.name)
+
+        self.render('editPostPage.html', **params)
+
+    def post(self, post_id):
+        key = db.Key.from_path('Post', int(post_id), parent=post_key())
+        post = db.get(key)
+        title = self.request.get('title')
+        content = self.request.get('content')
+
+        if title and content:
+            post.title = title
+            post.content = content
+            post.put()
+            self.redirect('/blog')
+        else:
+            error = "Both subject and content are required!"
+            self.render("newPostPage.html", title = title, content = content, error = error)
 
 
 
 class Logout(BlogHandler):
     def get(self):
         self.logout()
-        self.redirect('/blog')
+        self.redirect('/')
 
 
 
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/signup', Register),
                                ('/blog', BlogFront),
-                               ('/blog/([0-9]+)', PostPage),
+                               ('/blog/edit/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPost),
                                ('/signup', Register),
                                ('/logout', Logout)
