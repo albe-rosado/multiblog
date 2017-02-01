@@ -2,6 +2,7 @@ body {
     font-family: 'Source Code Pro', monospace;
 }
 
+
 nav {
     margin-top: 1em;
 }
@@ -26,4 +27,26 @@ input {
 
 .comp-text {
     margin-top: 1.5em;
+}
+
+.btn-del {
+    color: red;
+    font-size: x-large !important;
+    margin-left: 1em;
+}
+
+.card-link {
+    margin: 0.6em;
+}
+
+.like {
+    font-size: x-large !important;
+    margin: 0.6em;
+    color: #0275d8;
+}
+
+.dislike {
+    font-size: x-large !important;
+    margin: 0.6em;
+    color: #0275d8;
 }

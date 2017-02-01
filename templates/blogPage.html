@@ -2,6 +2,19 @@
 
 {% block content %}
 
+<div class="row">
+    <div class="col-sm-12">
+        <a href="/blog/newpost"> New Post?</a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <hr>
+    </div>
+</div>
+
+
+
 {% for post in posts %}
     <div class="row">
         <div class=" col-md-6 card">
@@ -11,6 +24,7 @@
                 <p class="card-text">{{post.content}}</p>
                 {% if post.author == username %}
                     <a href="/blog/edit/{{ post.key().id() }}" class="card-link">Edit </a>
+                    <a href="/blog/remove/{{ post.key().id() }}" class="card-link "><i class="fa fa-trash-o btn-del" aria-hidden="true"></i> </a>
                 {% endif %}
             </div>
         </div>

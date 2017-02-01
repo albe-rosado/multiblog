@@ -1,6 +1,7 @@
 import os
 import re
 import hmac
+import time
 import jinja2
 import webapp2
 from model import db, post_key, users_key, User, Post
@@ -91,7 +92,6 @@ class MainPage(BlogHandler):
 
 
 
-
 # Sign Up Page
 class SignUpPage(BlogHandler):
     def get(self):
@@ -121,7 +121,6 @@ class SignUpPage(BlogHandler):
         raise NotImplementedError
 
 
-
 class Register(SignUpPage):
     def done(self):
         #make sure the user doesn't already exist
@@ -137,11 +136,12 @@ class Register(SignUpPage):
             self.redirect('/blog')
 
 
-
+# Blog Page
 class BlogFront(Register):
     def get(self):
         posts = Post.all().order('-created')
         params = dict(username = self.user.name, posts = posts)
+        time.sleep(0.1)
         self.render('blogPage.html', **params)
 
 
@@ -171,7 +171,7 @@ class NewPost(BlogHandler):
             self.render("newPostPage.html", title = title, content = content, error = error)
 
 
-
+# Edit Post Page
 class PostPage(BlogHandler):
     def get(self, post_id):
         key = db.Key.from_path('Post', int(post_id), parent=post_key())
@@ -210,6 +210,12 @@ class Logout(BlogHandler):
         self.logout()
         self.redirect('/')
 
+class DeletePost(BlogHandler):
+    def get(self, post_id):
+        key = db.Key.from_path('Post', int(post_id), parent=post_key())
+        post = db.get(key)
+        post.delete()
+        self.redirect('/blog')
 
 
 app = webapp2.WSGIApplication([('/', MainPage),
@@ -217,6 +223,7 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog', BlogFront),
                                ('/blog/edit/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPost),
+                               ('/blog/remove/([0-9]+)', DeletePost),
                                ('/signup', Register),
                                ('/logout', Logout)
                                ],
