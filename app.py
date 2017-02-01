@@ -127,11 +127,10 @@ class Register(SignUpPage):
         u = User.by_name(self.username)
         if u:
             msg = 'That user already exists.'
-            self.render('signUpPage.html', error_username = msg)
+            self.render('signUpPage.html', error_message = msg)
         else:
             u = User.register(self.username, self.password)
             u.put()
-
             self.login(u)
             self.redirect('/blog')
 
