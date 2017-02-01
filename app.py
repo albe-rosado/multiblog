@@ -204,12 +204,13 @@ class PostPage(BlogHandler):
             self.render("newPostPage.html", title = title, content = content, error = error)
 
 
-
+# Logout
 class Logout(BlogHandler):
     def get(self):
         self.logout()
         self.redirect('/')
 
+# Delete Post
 class DeletePost(BlogHandler):
     def get(self, post_id):
         key = db.Key.from_path('Post', int(post_id), parent=post_key())

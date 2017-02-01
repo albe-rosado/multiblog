@@ -14,13 +14,13 @@
 </div>
 
 
-
 {% for post in posts %}
     <div class="row">
         <div class=" col-md-6 card">
             <div class="card-block">
                 <h4 class="card-title">{{post.title}}</h4>
                 <h6 class="card-subtitle mb-2 text-muted">By {{post.author}} on {{post.created.strftime("%a, %d %b %Y %H:%M:%S ")}}</h6>
+                <br>
                 <p class="card-text">{{post.content}}</p>
                 {% if post.author == username %}
                     <a href="/blog/edit/{{ post.key().id() }}" class="card-link">Edit </a>
