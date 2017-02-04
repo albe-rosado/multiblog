@@ -53,8 +53,9 @@ class User(db.Model):
             return u
 
 
-# Posts
 
+
+# Posts
 def post_key(name='default'):
     return db.Key.from_path('blogs', name)
 
@@ -63,16 +64,27 @@ class Post(db.Model):
     title = db.StringProperty(required=True)
     content = db.TextProperty(required=True)
     author = db.ReferenceProperty(User, collection_name='posts')
+    score = db.IntegerProperty(default=0)
     created = db.DateTimeProperty(auto_now_add=True)
 
 
-# Comments
 
-def comments_key(group='default'):
+
+# Comments
+def comment_key(group='default'):
     return db.Key.from_path('comments', group)
 
 
 class Comment(db.Model):
     content = db.TextProperty(required=True)
     author = db.ReferenceProperty(User, collection_name='comments')
+    parent_post = db.ReferenceProperty(Post, collection_name='comments')
     created = db.DateTimeProperty(auto_now_add=True)
+
+
+
+
+
+
+
+

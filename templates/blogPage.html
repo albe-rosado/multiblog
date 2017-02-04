@@ -21,8 +21,11 @@
             <br>
             <p class="card-text">{{post.content}}</p>
             {% if post.author.name == username %}
-            <a href="/blog/edit/{{ post.key().id() }}" class="card-link">Edit </a>
-            <a href="/blog/remove/{{ post.key().id() }}" class="card-link "><i class="fa fa-trash-o btn-del" aria-hidden="true"></i> </a>            {% endif %}
+            <a href="/blog/{{ post.key().id() }}/edit" class="card-link">Edit </a>
+            <a href="/blog/{{ post.key().id() }}/remove" class="card-link "><i class="fa fa-trash-o btn-del" aria-hidden="true"></i> </a>            {% endif %}
+            {% if post.author.name != username %}
+            <a href="/blog/{{ post.key().id() }}/comment" class="card-link">Comment </a>
+            {% endif %}
         </div>
     </div>
 </div>

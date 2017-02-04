@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class=" col-md-6 card">
+        <div class="card-block">
+            <h4 class="card-title">{{post.title}}</h4>
+            <h6 class="card-subtitle mb-2 text-muted">By {{post.author.name}} on {{post.created.strftime("%a, %d %b %Y %H:%M:%S ")}}</h6>
+            <br>
+            <p class="card-text">{{post.content}}</p>
+            <a href="/blog" class="card-link"> Go Back</i> </a>
+        </div>
+    </div>
+    {# Only post's non owners can submit a comment #}
+    {% if username != post.author.name%}
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-block">
+                <form method="POST">
+                    <div class="form-group">
+                        <label> New Comment </label>
+                        <textarea class="form-control" name="content"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+<div class="row">
+    <div class="col-md-12"><hr></div>
+</div>
+{% for comment in comments %}
+<div class="row">
+    <div class=" col-md-12 card">
+        <div class="card-block">
+            <h6 class="card-subtitle mb-2 text-muted">By {{comment.author.name}} on {{comment.created.strftime("%a, %d %b %Y %H:%M:%S ")}}</h6>
+            <br>
+            <p class="card-text"> {{comment.content}}</p>
+            {% if comment.author.name == username %}
+            <a href="/blog/{{ post.key().id() }}/comment/{{comment.key().id() }}/edit" class="card-link">Edit</a>
+            <a href="/blog/{{ post.key().id() }}/comment/{{comment.key().id() }}/delete" class="card-link "><i class="fa fa-trash-o btn-del" aria-hidden="true"></i></a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<br>
+{% endfor %}
+
+
+{% endblock  %}

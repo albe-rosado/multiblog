@@ -4,7 +4,7 @@ import hmac
 import time
 import jinja2
 import webapp2
-from models import db, post_key, users_key, User, Post
+from models import db, post_key, users_key, User, Post, Comment
 
 
 secret = 'secret'
@@ -63,6 +63,9 @@ def user_owns_post(self, post):
 def user_logged_in(self):
     return self.user
 
+
+def comment_belongs_to_post(comment, post_id):
+    return comment.parent_post == post_id
 
 
 
@@ -204,35 +207,36 @@ class NewPost(BlogHandler):
 
 
 # Edit Post Page
-class PostPage(BlogHandler):
+class EditPost(BlogHandler):
+
     def get(self, post_id):
+        if not user_logged_in(self):
+            return self.redirect('/')
+
         key = db.Key.from_path('Post', int(post_id), parent=post_key())
         post = db.get(key)
         if not post:
             return self.error(404)
-
-        if not user_logged_in(self):
-            self.redirect('/')
-
         if user_owns_post(self, post):
             params = dict(title=post.title, content=post.content,
                       username=self.user.name)
             self.render('editPostPage.html', **params)
         else:
-            self.redirect('/')
+            return self.redirect('/')
 
     def post(self, post_id):
+        # checks if user is logged in
+        if not user_logged_in(self):
+            return self.redirect('/')
+
         key = db.Key.from_path('Post', int(post_id), parent=post_key())
         post = db.get(key)
         if not post:
             return self.error(404)
 
-        # checks if user is logged in
-        if not user_logged_in(self):
-            self.redirect('/')
         # checks if the user owns the post
         if not user_owns_post(self, post):
-            self.redirect('/')
+            return self.redirect('/')
 
         title = self.request.get('title')
         content = self.request.get('content')
@@ -257,12 +261,11 @@ class Logout(BlogHandler):
         self.redirect('/')
 
 
-# Delete Post
 
+# Delete Post
 class DeletePost(BlogHandler):
 
     def get(self, post_id):
-
         if user_logged_in(self):
             key = db.Key.from_path('Post', int(post_id), parent=post_key())
             post = db.get(key)
@@ -277,21 +280,61 @@ class DeletePost(BlogHandler):
 
 
 
+# Posts comments
+class CommentPost(BlogHandler):
+    def get(self, post_id):
+        if user_logged_in(self):
+            key = db.Key.from_path('Post', int(post_id), parent=post_key())
+            post = db.get(key)
+            if not post:
+                return self.error(404)
+
+            comments = db.GqlQuery("SELECT * FROM Comment WHERE parent_post = :post", post=post)
+            self.render('postComments.html', post=post, comments = comments, username = self.user.name)
+        else:
+            return self.redirect('/')
+
+    def post(self, post_id):
+        if user_logged_in(self):
+            key = db.Key.from_path('Post', int(post_id), parent=post_key())
+            post = db.get(key)
+            if not post:
+                return self.error(404)
+            # Only posts non-owners can comment
+            if not user_owns_post(self, post):
+                content = self.request.get('content')
+                comment = Comment(parent=comment_key(), content=content, author = self.user, parent_post = post)
+                comment.put()
+                time.sleep(0.1)
+                self.redirect('/blog/comment/%s' % str(post_id))
+            else:
+                return self.redirect('/blog')
+
+
+
+# Edit Comments
+class EditComment(BlogHandler):
+    pass
+
+
+
+
+# Delete Comments
+class DeleteComment(BlogHandler):
+    pass
+
+
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/signup', Register),
+                               ('/logout', Logout),
                                ('/blog', BlogFront),
-                               ('/blog/edit/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPost),
-                               ('/blog/remove/([0-9]+)', DeletePost),
-                               ('/signup', Register),
-                               ('/logout', Logout)
+                               ('/blog/([0-9]+)/edit', EditPost),
+                               ('/blog/([0-9]+)/remove', DeletePost),
+                               ('/blog/([0-9]+)/comment', CommentPost),
+                               ('/blog/([0-9]+)/comment/([0-9]+)/edit', EditComment),
+                               ('/blog/([0-9]+)/comment/([0-9]+)/delete', DeleteComment)
                                ],
                               debug=True)
 
 
-"""
-TODO:
-    - Add comments feature
-    - Add Like/Dislike feature
-
-"""
