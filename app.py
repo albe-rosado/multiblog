@@ -4,10 +4,10 @@ import hmac
 import time
 import jinja2
 import webapp2
-from models import db, post_key, users_key, User, Post, Comment
+from models import db, post_key, users_key, comment_key, User, Post, Comment
 
 
-secret = 'secret'
+secret = ' q728b3tx8nisr27tmat7y3khrm1i24qhlfakelf2,i3gqh4nx'
 
 
 # Jinja initialization
@@ -63,10 +63,8 @@ def user_owns_post(self, post):
 def user_logged_in(self):
     return self.user
 
-
-def comment_belongs_to_post(comment, post_id):
-    return comment.parent_post == post_id
-
+def user_owns_comment(self, comment):
+    return self.user.name == comment.author.name
 
 
 # Hashing Methods
@@ -212,7 +210,6 @@ class EditPost(BlogHandler):
     def get(self, post_id):
         if not user_logged_in(self):
             return self.redirect('/')
-
         key = db.Key.from_path('Post', int(post_id), parent=post_key())
         post = db.get(key)
         if not post:
@@ -282,6 +279,7 @@ class DeletePost(BlogHandler):
 
 # Posts comments
 class CommentPost(BlogHandler):
+
     def get(self, post_id):
         if user_logged_in(self):
             key = db.Key.from_path('Post', int(post_id), parent=post_key())
@@ -289,7 +287,7 @@ class CommentPost(BlogHandler):
             if not post:
                 return self.error(404)
 
-            comments = db.GqlQuery("SELECT * FROM Comment WHERE parent_post = :post", post=post)
+            comments = db.GqlQuery("SELECT * FROM Comment WHERE parent_post = :post ORDER BY created DESC", post=post)
             self.render('postComments.html', post=post, comments = comments, username = self.user.name)
         else:
             return self.redirect('/')
@@ -306,22 +304,82 @@ class CommentPost(BlogHandler):
                 comment = Comment(parent=comment_key(), content=content, author = self.user, parent_post = post)
                 comment.put()
                 time.sleep(0.1)
-                self.redirect('/blog/comment/%s' % str(post_id))
+                self.redirect('/blog/%s/comment' % str(post_id))
             else:
                 return self.redirect('/blog')
 
 
 
+
 # Edit Comments
 class EditComment(BlogHandler):
-    pass
 
+    def get(self, post_id, comment_id):
+        if user_logged_in(self):
+            key = db.Key.from_path('Post', int(post_id), parent=post_key())
+            post = db.get(key)
+            if not post:
+                return self.error(404)
+            key = db.Key.from_path('Comment', int(comment_id), parent=comment_key())
+            comment = db.get(key)
+            if not comment:
+                return self.error(404)
+            # checks if the user owns the comment
+            if user_owns_comment(self, comment):
+                params = dict( content=post.content,
+                          username=self.user.name)
+                self.render('editComment.html', **params)
+        else:
+            return self.redirect('/')
+
+    def post(self, post_id, comment_id):
+        # checks if user is logged in
+        if user_logged_in(self):
+            key = db.Key.from_path('Post', int(post_id), parent=post_key())
+            post = db.get(key)
+            if not post:
+                return self.error(404)
+            key = db.Key.from_path('Comment', int(comment_id), parent=comment_key())
+            comment = db.get(key)
+            if not comment:
+                return self.error(404)
+            # checks if the user owns the comment
+            if user_owns_comment(self, comment):
+                content = self.request.get('content')
+                if content:
+                    comment.content = content
+                    comment.put()
+                    time.sleep(0.1)
+                    self.redirect('/blog/%s/comment' % str(post_id))
+                else:
+                    error = "Some content is required!"
+                    self.render("editComment.html",
+                                content=content, error=error)
+        else:
+            return self.redirect('/')
 
 
 
 # Delete Comments
 class DeleteComment(BlogHandler):
-    pass
+
+    def get(self, post_id, comment_id):
+        if user_logged_in(self):
+            key = db.Key.from_path('Post', int(post_id), parent=post_key())
+            post = db.get(key)
+            if not post:
+                return self.error(404)
+            key = db.Key.from_path('Comment', int(comment_id), parent=comment_key())
+            comment = db.get(key)
+            if not comment:
+                return self.error(404)
+            if user_owns_comment(self, comment):
+                comment.delete()
+                time.sleep(0.1)
+                self.redirect('/blog/%s/comment' % str(post_id))
+        else:
+            self.redirect('/')
+
 
 
 app = webapp2.WSGIApplication([('/', MainPage),

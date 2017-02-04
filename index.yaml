@@ -12,6 +12,12 @@ indexes:
 
 - kind: Comment
   properties:
+  - name: parent_post
+  - name: created
+    direction: desc
+
+- kind: Comment
+  properties:
   - name: parent_post=
   - name: created
     direction: desc
