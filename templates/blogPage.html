@@ -1,32 +1,38 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
 
-<div class="row">
-    <div class="col-sm-12">
-        <a href="/blog/newpost"> New Post?</a>
-    </div>
-</div>
-<div class="row">
-    <div class="col-sm-12">
-        <hr>
-    </div>
-</div>
+{% block content %}
 
-
-{% for post in posts %}
-<div class="row">
-    <div class=" col-md-6 card">
-        <div class="card-block">
-            <h4 class="card-title">{{post.title}}</h4>
-            <h6 class="card-subtitle mb-2 text-muted">By {{post.author.name}} on {{post.created.strftime("%a, %d %b %Y %H:%M:%S ")}}</h6>
-            <br>
-            <p class="card-text">{{post.content}}</p>
-            {% if post.author.name == username %}
-            <a href="/blog/{{ post.key().id() }}/edit" class="card-link">Edit </a>
-            <a href="/blog/{{ post.key().id() }}/remove" class="card-link "><i class="fa fa-trash-o btn-del" aria-hidden="true"></i> </a>            {% endif %}
-            {% if post.author.name != username %}
-            <a href="/blog/{{ post.key().id() }}/comment" class="card-link">Comment </a>
-            {% endif %}
+    <div class="row">
+        <div class="col-sm-12">
+            <a href="/blog/newpost"> New Post?</a>
         </div>
     </div>
-</div>
-<br> {% endfor %} {% endblock %}
+    <div class="row">
+        <div class="col-sm-12">
+            <hr>
+        </div>
+    </div>
+
+    {% for post in posts %}
+    <div class="row">
+        <div class=" col-md-6 card">
+            <div class="card-block">
+                <h4 class="card-title">{{post.title}}</h4>
+                <h6 class="card-subtitle mb-2 text-muted">By {{post.author.name}} on {{post.created.strftime("%a, %d %b %Y %H:%M:%S ")}}</h6>
+                <br>
+                <p class="card-text">{{post.content}}</p>
+                {% if post.author.name == username %}
+                <a href="/blog/{{ post.key().id() }}/edit" class="card-link">Edit </a>
+                <a href="/blog/{{ post.key().id() }}/remove" class="card-link "><i class="fa fa-trash-o btn-del" aria-hidden="true"></i> </a>
+                {% endif %}
+                {% if post.author.name != username %}
+                <a href="/blog/{{ post.key().id() }}/comment" class="card-link">Comment </a>
+                <a id="{{post.key().id()}}" href="#" class="card-link" onclick="switchVisible(this)">Like</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <br>
+    {% endfor %}
+
+{% endblock %}

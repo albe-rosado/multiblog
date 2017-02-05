@@ -55,6 +55,7 @@ class BlogHandler(webapp2.RequestHandler):
         self.user = uid and User.by_id(int(uid))
 
 
+
 # Security Layer
 def user_owns_post(self, post):
     if post:
@@ -112,6 +113,7 @@ class MainPage(BlogHandler):
             self.render('mainPage.html', error=msg)
 
 
+
 # Sign Up Page
 class SignUpPage(BlogHandler):
 
@@ -158,6 +160,16 @@ class Register(SignUpPage):
 
 
 
+# Logout
+class Logout(BlogHandler):
+
+    def get(self):
+        self.logout()
+        self.redirect('/')
+
+
+
+
 # Blog Page
 class BlogFront(BlogHandler):
 
@@ -170,6 +182,7 @@ class BlogFront(BlogHandler):
             self.render('blogPage.html', **params)
         else:
             self.redirect('/')
+
 
 
 
@@ -248,14 +261,6 @@ class EditPost(BlogHandler):
             self.render("newPostPage.html", title=title,
                         content=content, error=error)
 
-
-
-# Logout
-class Logout(BlogHandler):
-
-    def get(self):
-        self.logout()
-        self.redirect('/')
 
 
 

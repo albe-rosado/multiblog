@@ -81,10 +81,3 @@ class Comment(db.Model):
     parent_post = db.ReferenceProperty(Post, collection_name='comments')
     created = db.DateTimeProperty(auto_now_add=True)
 
-
-
-
-
-
-
-
