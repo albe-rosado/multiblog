@@ -13,7 +13,7 @@
         <div class=" col-md-6 card">
             <div class="card-block">
                 <h4 class="card-title">{{post.title}}</h4>
-                <h6 class="card-subtitle mb-2 text-muted">By {{post.author.name}} on {{post.created.strftime("%a, %d %b %Y %H:%M:%S ")}}</h6>
+                <h6 class="card-subtitle mb-2 text-muted">By {{post.author.name}} on {{post.created.strftime("%a, %d %b %Y %H:%M:%S ")}} , {{post.likes()}} likes</h6>
                 <br>
                 <p class="card-text">{{post.content}}</p>
                 {% if post.author.name == user.name %}
@@ -23,9 +23,9 @@
                 {% if post.author.name != user.name %}
                     <a href="/blog/{{ post.key().id() }}/comment" class="card-link">Comment </a>
                     {% if post.liked(user) %}
-                            <a href="/blog/{{ post.key().id() }}/rate" class="card-link" onclick="switchVisible(this)">Like</a>
-                    {% else %}
                             <a href="/blog/{{ post.key().id() }}/rate" class="card-link" onclick="switchVisible(this)">Dislike</a>
+                    {% else %}
+                            <a href="/blog/{{ post.key().id() }}/rate" class="card-link" onclick="switchVisible(this)">Like</a>
                     {% endif %}
                 {% endif %}
             </div>
