@@ -2,7 +2,7 @@
 
 function switchVisible(elemnt) {
     if (elemnt.innerHTML == "Like") {
-        elemnt.innerHTML = "Unlike"
+        elemnt.innerHTML = "Dislike"
     }
     else {
     elemnt.innerHTML = "Like"

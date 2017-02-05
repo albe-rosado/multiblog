@@ -67,6 +67,13 @@ class Post(db.Model):
     score = db.IntegerProperty(default=0)
     created = db.DateTimeProperty(auto_now_add=True)
 
+    def likes(post):
+        likes = db.GqlQuery("SELECT * FROM Like WHERE parent_post=:post", post=post).count()
+        return likes
+
+    def liked(post, user):
+        liked = db.GqlQuery("SELECT * FROM Like WHERE parent_post=:post AND author=:user", post=post, user=user).get()
+        return liked
 
 
 
@@ -81,3 +88,13 @@ class Comment(db.Model):
     parent_post = db.ReferenceProperty(Post, collection_name='comments')
     created = db.DateTimeProperty(auto_now_add=True)
 
+
+
+# Likes
+def like_key(group='default'):
+    return db.Key.from_path('likes', group)
+
+
+class Like(db.Model):
+    author = db.ReferenceProperty(User, collection_name='like')
+    parent_post = db.ReferenceProperty(Post, collection_name='like')

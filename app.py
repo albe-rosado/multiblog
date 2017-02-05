@@ -4,7 +4,7 @@ import hmac
 import time
 import jinja2
 import webapp2
-from models import db, post_key, users_key, comment_key, User, Post, Comment
+from models import db, post_key, users_key, comment_key, User, Post, Comment, Like
 
 
 secret = ' q728b3tx8nisr27tmat7y3khrm1i24qhlfakelf2,i3gqh4nx'
@@ -177,7 +177,7 @@ class BlogFront(BlogHandler):
         # checks if user is logged in before showing blog entries
         if user_logged_in(self):
             posts = Post.all().order('-created')
-            params = dict(username=self.user.name, posts=posts)
+            params = dict(user=self.user, posts=posts)
             time.sleep(0.1)
             self.render('blogPage.html', **params)
         else:
@@ -208,7 +208,6 @@ class NewPost(BlogHandler):
                      content=content, author=self.user)
             p.put()
             self.redirect('/blog')
-            # self.redirect('/blog/%s' % str(p.key().id()))
         else:
             error = "Both subject and content are required!"
             self.render("newPostPage.html", title=title,
@@ -279,6 +278,29 @@ class DeletePost(BlogHandler):
                 self.redirect('/blog')
         else:
             self.redirect('/')
+
+
+# Like/Unlike Post
+class RatePost(BlogHandler):
+    def get(self, post_id):
+        if user_logged_in(self):
+            key = db.Key.from_path('Post', int(post_id), parent=post_key())
+            post = db.get(key)
+            if not post:
+                return self.error(404)
+            if not user_owns_post(self, post):
+                self.redirect('/')
+            if post.liked(self.user):
+                l = db.GqlQuery("SELECT * FROM Like WHERE author=:user AND parent_post=:post", user=self.user, post=post).get()
+                l.delete()
+                self.redirect('/blog')
+            else:
+                l = Like(author=self.user, parent_post=post)
+                l.put()
+                self.redirect('/blog')
+        else:
+            return self.redirect('/')
+
 
 
 
@@ -395,6 +417,7 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/([0-9]+)/edit', EditPost),
                                ('/blog/([0-9]+)/remove', DeletePost),
                                ('/blog/([0-9]+)/comment', CommentPost),
+                               ('/blog/([0-9]+)/rate', RatePost),
                                ('/blog/([0-9]+)/comment/([0-9]+)/edit', EditComment),
                                ('/blog/([0-9]+)/comment/([0-9]+)/delete', DeleteComment)
                                ],
