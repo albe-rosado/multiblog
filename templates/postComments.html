@@ -11,7 +11,7 @@
         </div>
     </div>
     {# Only post's non owners can submit a comment #}
-    {% if username != post.author.name%}
+    {% if user.name != post.author.name%}
     <div class="col-md-6">
         <div class="card">
             <div class="card-block">
@@ -37,7 +37,7 @@
             <h6 class="card-subtitle mb-2 text-muted">By {{comment.author.name}} on {{comment.created.strftime("%a, %d %b %Y %H:%M:%S ")}}</h6>
             <br>
             <p class="card-text"> {{comment.content}}</p>
-            {% if comment.author.name == username %}
+            {% if comment.author.name == user.name %}
             <a href="/blog/{{ post.key().id() }}/comment/{{comment.key().id() }}/edit" class="card-link">Edit</a>
             <a href="/blog/{{ post.key().id() }}/comment/{{comment.key().id() }}/delete" class="card-link "><i class="fa fa-trash-o btn-del" aria-hidden="true"></i></a>
             {% endif %}

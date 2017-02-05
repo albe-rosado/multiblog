@@ -194,7 +194,7 @@ class NewPost(BlogHandler):
         if not user_logged_in(self):
             self.redirect('/')
         else:
-            self.render("newPostPage.html", username=self.user.name)
+            self.render("newPostPage.html", user=self.user)
 
     def post(self):
         if not user_logged_in(self):
@@ -228,7 +228,7 @@ class EditPost(BlogHandler):
             return self.error(404)
         if user_owns_post(self, post):
             params = dict(title=post.title, content=post.content,
-                      username=self.user.name)
+                      user=self.user)
             self.render('editPostPage.html', **params)
         else:
             return self.redirect('/')
@@ -315,7 +315,7 @@ class CommentPost(BlogHandler):
                 return self.error(404)
 
             comments = db.GqlQuery("SELECT * FROM Comment WHERE parent_post = :post ORDER BY created DESC", post=post)
-            self.render('postComments.html', post=post, comments = comments, username = self.user.name)
+            self.render('postComments.html', post=post, comments = comments, user = self.user)
         else:
             return self.redirect('/')
 
@@ -354,7 +354,7 @@ class EditComment(BlogHandler):
             # checks if the user owns the comment
             if user_owns_comment(self, comment):
                 params = dict( content=post.content,
-                          username=self.user.name)
+                          user=self.user)
                 self.render('editComment.html', **params)
         else:
             return self.redirect('/')
